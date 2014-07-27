@@ -14,26 +14,15 @@ def main():
 
     satellite = twoline2rv(lines[7], lines[8], wgs72)
 
-    times = [
-		[2014, 3, 7, 16, 00, 00],
-		[2014, 3, 7, 16, 05, 00],
-		[2014, 3, 7, 16, 10, 00],
-		[2014, 3, 7, 16, 15, 00],
-		[2014, 3, 7, 16, 20, 00],
-		[2014, 3, 7, 16, 25, 00],
-		[2014, 3, 7, 16, 30, 00],
-		[2014, 3, 7, 16, 45, 00],
-		[2014, 3, 7, 16, 55, 00],
-		[2014, 3, 7, 17, 05, 00],
-		[2014, 3, 7, 18, 25, 00],
-		[2014, 3, 7, 19, 40, 00],
-		[2014, 3, 7, 20, 40, 00],
-		[2014, 3, 7, 21, 40, 00],
-		[2014, 3, 7, 22, 40, 00],
-		[2014, 3, 8, 00, 10, 00],
-		[2014, 3, 8, 00, 20, 00]
-        ]
-
+    times = []
+    report = csv.DictReader(open('atsb-report.csv', 'r'))
+    for r in report:
+	time = r['Time']
+	hours = int(time[0:2])
+	minutes = int(time[3:5])
+	seconds = int(time[6:8])
+	day = 7 if (hours > 12) else 8
+        times.append([2014, 3, day, hours, minutes, seconds])
 
     w = csv.writer(open('sgp4-positions.csv', 'w'), lineterminator='\n')
     w.writerow(['x', 'y','z', 'dx','dy', 'dz'])
@@ -45,6 +34,8 @@ def main():
 	velocity = numpy.asarray(velocity) * 24.0 * 60.0 * 60.0
 	p,v = TEME_to_ITRF(jd, position, velocity.tolist())
 	v = v / (24.0 * 60.0 * 60.0)
+	p = ["%0.1f" % i for i in p]
+	v = ["%0.5f" % i for i in v]
 	w.writerow([ p[0],p[1],p[2],v[0],v[1],v[2] ])
 
 if __name__=='__main__':
